@@ -33,10 +33,10 @@ extern const AP_HAL::HAL& hal;
 
 #define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
 
-#define TOSHIBA_LED_PWM0    0x01    // pwm0 register
-#define TOSHIBA_LED_PWM1    0x02    // pwm1 register
-#define TOSHIBA_LED_PWM2    0x03    // pwm2 register
-#define TOSHIBA_LED_ENABLE  0x04    // enable register
+#define TOSHIBA_LED_PWM0    0x81    // pwm0 register
+#define TOSHIBA_LED_PWM1    0x82    // pwm1 register
+#define TOSHIBA_LED_PWM2    0x83    // pwm2 register
+#define TOSHIBA_LED_ENABLE  0x84    // enable register
 
 ToshibaLED_I2C::ToshibaLED_I2C(uint8_t bus)
     : RGBLed(TOSHIBA_LED_OFF, TOSHIBA_LED_BRIGHT, TOSHIBA_LED_MEDIUM, TOSHIBA_LED_DIM)
@@ -62,7 +62,7 @@ bool ToshibaLED_I2C::hw_init(void)
     }
 
     // update the red, green and blue values to zero
-    uint8_t val[4] = { TOSHIBA_LED_PWM0, _led_off, _led_off, _led_off };
+    uint8_t val[6] = { TOSHIBA_LED_PWM0, _led_off, TOSHIBA_LED_PWM1, _led_off, TOSHIBA_LED_PWM2, _led_off };
     ret = _dev->transfer(val, sizeof(val), nullptr, 0);
 
     _dev->set_retries(1);
@@ -93,8 +93,8 @@ void ToshibaLED_I2C::_timer(void)
     _need_update = false;
 
     /* 4-bit for each color */
-    uint8_t val[4] = { TOSHIBA_LED_PWM0, (uint8_t)(rgb.b >> 4),
-                       (uint8_t)(rgb.g / 16), (uint8_t)(rgb.r / 16) };
+    uint8_t val[6] = { TOSHIBA_LED_PWM0, (uint8_t)(rgb.b >> 4), TOSHIBA_LED_PWM1,
+                       (uint8_t)(rgb.g / 16), TOSHIBA_LED_PWM2, (uint8_t)(rgb.r / 16) };
 
     _dev->transfer(val, sizeof(val), nullptr, 0);
 }
